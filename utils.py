@@ -1,5 +1,5 @@
-import sys, struct
-sys.path.append('django-dependencies/')
+import sys, struct, os.path
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'django-dependencies'))
 
 from django.utils import text
 from django.utils.http import (

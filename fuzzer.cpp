@@ -15,16 +15,43 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+static std::string ToAbsolutePath(const std::string argv0, const std::string relativePath) {
+    char absoluteRootPath[PATH_MAX+1];
+    char argv0Copy[argv0.size()+1];
+    memcpy(argv0Copy, argv0.c_str(), argv0.size()+1);
+    if ( realpath(dirname(argv0Copy), absoluteRootPath) == nullptr ) {
+        printf("Fatal error: Cannot resolve absolute root path\n");
+        abort();
+    }
+
+    return std::string(std::string(absoluteRootPath) + "/" + relativePath);
+}
+
+static std::string Dirname(const std::string path) {
+    char pathCopy[path.size()+1];
+    memcpy(pathCopy, path.c_str(), path.size()+1);
+    return std::string(dirname(pathCopy));
+}
+
 void* pFunc = nullptr;
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     const std::string argv0 = (*argv)[0];
 
-    std::string scriptRootPath;
+    const std::string absoluteCPythonInstallPath = ToAbsolutePath(argv0, "cpython-install");
+    const std::string absoluteScriptPath = ToAbsolutePath(argv0, PYTHON_HARNESS_PATH);
 
     std::vector<uint8_t> program;
-    FILE* fp = fopen(PYTHON_HARNESS_PATH, "rb");
+
+    {
+        if ( setenv("PYTHONHOME", absoluteCPythonInstallPath.c_str(), 1) != 0 ) {
+            printf("Fatal error: Cannot set PYTHONHOME\n");
+            abort();
+        }
+    }
+
+    FILE* fp = fopen(absoluteScriptPath.c_str(), "rb");
     if ( fp == nullptr ) {
-        printf("Fatal error: Cannot open script: %s\n", PYTHON_HARNESS_PATH);
+        printf("Fatal error: Cannot open script: %s\n", absoluteScriptPath.c_str());
         abort();
     }
 
@@ -45,16 +72,6 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     std::string code = std::string(program.data(), program.data() + program.size());
 
     {
-        /* Resolve script root path */
-        char resolved_path[PATH_MAX+1];
-        if ( realpath(PYTHON_HARNESS_PATH, resolved_path) == nullptr ) {
-            printf("Fatal error: Cannot resolve full script path\n");
-            abort();
-        }
-        scriptRootPath = std::string(dirname(resolved_path));
-    }
-
-    {
         wchar_t *program = Py_DecodeLocale(argv0.c_str(), nullptr);
         Py_SetProgramName(program);
         PyMem_RawFree(program);
@@ -66,7 +83,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
         std::string setArgv0;
         setArgv0 += "import sys";
         setArgv0 += "\n";
-        setArgv0 += "sys.argv[0] = '" + std::string(PYTHON_HARNESS_PATH) + "'\n";
+        setArgv0 += "sys.argv[0] = '" + absoluteScriptPath + "'\n";
         if ( PyRun_SimpleString(setArgv0.c_str()) != 0 ) {
             printf("Fatal: Cannot set argv[0]\n");
             PyErr_PrintEx(1);
@@ -78,7 +95,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
         std::string setPYTHONPATH;
         setPYTHONPATH += "import sys";
         setPYTHONPATH += "\n";
-        setPYTHONPATH += "sys.path.append('" + scriptRootPath + "')\n";
+        setPYTHONPATH += "sys.path.append('" + Dirname(absoluteScriptPath) + "')\n";
         setPYTHONPATH += "\n";
         if ( PyRun_SimpleString(setPYTHONPATH.c_str()) != 0 ) {
             printf("Fatal: Cannot set PYTHONPATH\n");
