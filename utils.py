@@ -4,7 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'dja
 from django.utils import text
 from django.utils.http import (
     base36_to_int, escape_leading_slashes, http_date, int_to_base36,
-    is_safe_url, is_same_domain, parse_etags, parse_http_date, quote_etag,
+    url_has_allowed_host_and_scheme, is_same_domain, parse_etags, parse_http_date, quote_etag,
     urlencode, urlquote, urlquote_plus, urlsafe_base64_decode,
     urlsafe_base64_encode, urlunquote, urlunquote_plus,
 )
@@ -33,8 +33,8 @@ def test_base36_to_int(inp):
 def test_escape_leading_slashes(inp):
     escape_leading_slashes(inp)
 
-def test_is_safe_url(inp):
-    is_safe_url(inp, allowed_hosts={'a', 'b'})
+def test_url_has_allowed_host_and_scheme(inp):
+    url_has_allowed_host_and_scheme(inp, allowed_hosts={'a', 'b'})
 
 def test_parse_etags(inp):
     parse_etags(inp)
@@ -274,7 +274,7 @@ def test_limited_parse_qsl(inp):
 tests = [
     (test_base36_to_int, str),
     (test_escape_leading_slashes, str),
-    (test_is_safe_url, str),
+    (test_url_has_allowed_host_and_scheme, str),
     (test_parse_etags, str),
     (test_parse_http_date, str),
     (test_quote_etag, str),
