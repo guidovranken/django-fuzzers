@@ -5,8 +5,7 @@ from django.utils import text
 from django.utils.http import (
     base36_to_int, escape_leading_slashes, http_date, int_to_base36,
     url_has_allowed_host_and_scheme, is_same_domain, parse_etags, parse_http_date, quote_etag,
-    urlencode, urlquote, urlquote_plus, urlsafe_base64_decode,
-    urlsafe_base64_encode, urlunquote, urlunquote_plus,
+    urlencode, urlsafe_base64_decode, urlsafe_base64_encode
 )
 from django.utils.html import (
     conditional_escape, escape, escapejs, format_html, html_safe, json_script,
@@ -53,12 +52,6 @@ def test_urlencode(inp):
     except:
         pass
 
-def test_urlquote(inp):
-    urlquote(inp)
-
-def test_urlquote_plus(inp):
-    urlquote_plus(inp)
-
 def test_urlsafe_base64_decode(inp):
     try:
         urlsafe_base64_decode(inp)
@@ -67,12 +60,6 @@ def test_urlsafe_base64_decode(inp):
 
 def test_urlsafe_base64_encode(inp):
     urlsafe_base64_encode(inp)
-
-def test_urlunquote(inp):
-    urlunquote(inp)
-
-def test_urlunquote_plus(inp):
-    urlunquote_plus(inp)
 
 def test_conditional_escape(inp):
     conditional_escape(inp)
@@ -279,12 +266,8 @@ tests = [
     (test_parse_http_date, str),
     (test_quote_etag, str),
     (test_urlencode, str),
-    (test_urlquote, str),
-    (test_urlquote_plus, str),
     (test_urlsafe_base64_decode, str),
     (test_urlsafe_base64_encode, bytes),
-    (test_urlunquote, str),
-    (test_urlunquote_plus, str),
     (test_conditional_escape, str),
     (test_escape, str),
     (test_escapejs, str),
