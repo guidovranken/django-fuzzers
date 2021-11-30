@@ -1,5 +1,4 @@
 import sys, struct, os.path
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'django-dependencies'))
 
 from django.utils import text
 from django.utils.http import (
@@ -317,15 +316,15 @@ tests = [
 
 ]
 
-def FuzzerRunOne(FuzzerInput):
-    if len(FuzzerInput) < 2:
-        return
-    choice = struct.unpack('>H', FuzzerInput[:2])[0]
-    if choice >= len(tests):
-        return
-    FuzzerInput = FuzzerInput[2:]
-
-    if tests[choice][1] == str:
-        FuzzerInput = FuzzerInput.decode("utf8", "replace")
-    
-    tests[choice][0](FuzzerInput)
+#def FuzzerRunOne(FuzzerInput):
+#    if len(FuzzerInput) < 2:
+#        return
+#    choice = struct.unpack('>H', FuzzerInput[:2])[0]
+#    if choice >= len(tests):
+#        return
+#    FuzzerInput = FuzzerInput[2:]
+#
+#    if tests[choice][1] == str:
+#        FuzzerInput = FuzzerInput.decode("utf8", "replace")
+#    
+#    tests[choice][0](FuzzerInput)
